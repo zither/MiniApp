@@ -8,4 +8,7 @@ env:
 
   - DB=mysql
 
+before_script:
+  - mysql -e 'create database MiniApp_test;'
+
 script: phpunit --coverage-text ./tests/

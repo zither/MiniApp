@@ -275,9 +275,9 @@ class Config
                 'database' => array(
                         'host' => 'localhost',
                         'port' => '3306',
-                        'name' => 'test',
-                        'user' => 'root',
-                        'password' => 'test'
+                        'name' => 'MiniApp_test',
+                        'user' => 'travis',
+                        'password' => ''
                     )
         );
 
