@@ -1,6 +1,6 @@
 <?php
 
-require_once 'src/MiniApp.php';
+require_once 'Bootstrap.php';
 
 class ConfigTest extends PHPUnit_Framework_TestCase
 {

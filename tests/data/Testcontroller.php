@@ -13,4 +13,9 @@ class Testcontroller extends \MiniApp\BaseController
     {
         echo "Hello,$name!";
     }
+
+    public function stopGet()
+    {
+        throw new \MiniApp\StopException();
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 
-require_once 'src/MiniApp.php';
+require_once 'Bootstrap.php';
 
 class MiniAppTest extends PHPUnit_Framework_TestCase
 {
@@ -58,7 +58,7 @@ class MiniAppTest extends PHPUnit_Framework_TestCase
     {
         $this->expectOutputString("<p>Hello</p>\n");
         $app = new \MiniApp\MiniApp();
-        $app->config('view_path', './tests/data/');
+        $app->config('view_path', __DIR__ . '/data/');
         $app->displayView('template');
     }
 
@@ -76,14 +76,91 @@ class MiniAppTest extends PHPUnit_Framework_TestCase
         $this->expectOutputString('Hello,MiniApp!');
         \MiniApp\MiniApp::autoloadRegister();
         $env = array('REQUEST_METHOD' => 'GET','PATH_INFO' => '/testcontroller/home/MiniApp');
-        $app = new \MiniApp\MiniApp(array('controller_path'=> './tests/data/'));
+        $app = new \MiniApp\MiniApp(array('controller_path'=> __DIR__ . '/data/'));
         $app->mock($env);
         $app->run();
     }
 
     public function testAutoload()
     {
-        $bool = \MiniApp\MiniApp::autoload('Class\\Not\\Defined');
-        $this->assertTrue(!$bool);
+        $s1 = \MiniApp\MiniApp::autoload('Class\\Not\\Defined');
+        $this->assertFalse($s1);
+        $s2 = \MiniApp\MiniApp::autoload('MiniApp\\BaseController');
+        $this->assertFalse($s2);
+    }
+
+    /**
+     * @runInSeparateProcess 
+     * @expectedException \MiniApp\StopException
+     */
+    public function testRedirect()
+    {
+        $app = new \MiniApp\MiniApp();
+        $app->redirect('/about');
+        $this->assertContains('Location: /about', xdebug_get_headers());
+    }
+
+    public function testCheckLoginWithCorrectUser()
+    {
+        $_SERVER['PHP_AUTH_USER'] = \MiniApp\Config::get('auth_user');
+        $_SERVER['PHP_AUTH_PW'] = \MiniApp\Config::get('auth_password');
+        $app = new \MiniApp\MiniApp();
+        $this->assertTrue($app->checkLogin());
+    }
+
+    /**
+     * @expectedException \MiniApp\StopException
+     */
+    public function testCheckLoginWithWrongUser()
+    {
+        $this->expectOutputString('You cant login.');
+        $_SERVER['PHP_AUTH_USER'] = 'WrongUser';
+        $_SERVER['PHP_AUTH_PW'] = 'WrongPassword';
+        $app = new \MiniApp\MiniApp();
+        $app->checkLogin();
+    }
+
+    /**
+     * @runInSeparateProcess
+     * @expectedException \MiniApp\StopException
+     */
+    public function testCheckLoginWithoutUser()
+    {
+        $this->expectOutputString('Unauthorized.');
+        $app = new \MiniApp\MiniApp();
+        $app->checkLogin();
+    }
+
+
+    /**
+     * @runInSeparateProcess
+     * @expectedException \MiniApp\StopException
+     */
+    public function testCacheWithNotExpires()
+    {
+        $_SERVER['HTTP_IF_MODIFIED_SINCE'] = 'Sun, 30 Dec 2018 00:00:00 +0800'; 
+        $app = new \MiniApp\MiniApp();
+        $app->cache();
+        $this->assertContains('HTTP/1.1 304 Not Modified', xdebug_get_headers());
+    }
+
+    /**
+     * @runInSeparateProcess
+     */
+    public function testCacheWithExpires()
+    {
+        $_SERVER['HTTP_IF_MODIFIED_SINCE'] = 'Wed, 30 Dec 1987 00:00:00 +0800'; 
+        $app = new \MiniApp\MiniApp();
+        $app->cache();
+        $this->assertFalse(in_array('Last-Modified: Wed, 30 Dec 1987 00:00:00 +0800', xdebug_get_headers()));
+    }
+
+    /**
+     * @expectedException \MiniApp\StopException
+     */
+    public function testStop()
+    {
+        $app = new \MiniApp\MiniApp();
+        $app->stop();
     }
 }

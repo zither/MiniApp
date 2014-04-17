@@ -1,6 +1,6 @@
 <?php
 
-require_once 'src/MiniApp.php';
+require_once 'Bootstrap.php';
 \MiniApp\MiniApp::autoloadRegister();
 
 class BaseControllerTest extends PHPUnit_Framework_TestCase
@@ -15,7 +15,7 @@ class BaseControllerTest extends PHPUnit_Framework_TestCase
 
     public function testModel()
     {
-        $app = new \MiniApp\MiniApp(array('model_path' => './tests/data/'));
+        $app = new \MiniApp\MiniApp(array('model_path' => __DIR__ . '/data/'));
         $controller = new \MiniApp\BaseController();
         $this->assertInstanceOf('\\MiniApp\\BaseModel', $controller->model('AppTestModel'));
         $this->assertSame($controller->model('AppTestModel'), $controller->model('AppTestModel'));

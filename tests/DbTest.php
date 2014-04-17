@@ -1,6 +1,6 @@
 <?php
 
-require_once 'src/MiniApp.php';
+require_once 'Bootstrap.php';
 \MiniApp\MiniApp::autoloadRegister();
 
 class DbTest extends PHPUnit_Framework_TestCase

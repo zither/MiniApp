@@ -98,11 +98,11 @@ class MiniApp
     /**
      * @brief 运行应用
      *
-     * @return void
+     * @return boolean 
      */
     public function run()
     {
-        $this->route->dispatch();
+        return $this->route->dispatch();
     }
 
     /**
@@ -120,18 +120,21 @@ class MiniApp
                     ) {
                     $_SESSION['LOGINED'] = true;
                 } else {
-                    die("You can't login.");
+                    echo "You cant login.";
+                    $this->stop();
                 }
             } else {
                 header('WWW-Authenticate: Basic realm="App4u"');
                 header('HTTP/1.1 401 Unauthorized');
-                die('Unauthorized.');
+                echo 'Unauthorized.';
+                $this->stop();
             }
         }
+        return true;
     }
 
     /**
-     * @brief 封装一个简单的跳转函数
+     * @brief 封装一个简单的跳转函数，需要结合 return 使用
      *
      * @param $url
      * @param $responseCode
@@ -141,7 +144,7 @@ class MiniApp
     public function redirect($url, $responseCode = 302)
     {
         header("Location: $url", true, $responseCode);
-        exit;
+        $this->stop();
     }
 
     /**
@@ -161,7 +164,7 @@ class MiniApp
                 header("Last-Modified: " . $_SERVER['HTTP_IF_MODIFIED_SINCE']);
                 header('Expires: ' . date('r', $expires));
                 header('HTTP/1.1 304 Not Modified');
-                exit;
+                $this->stop();
             }
         }
         $currentTime = time();
@@ -198,6 +201,11 @@ class MiniApp
     public function mock($settings = array())
     {
         return $this->route->mock($settings);
+    }
+
+    public function stop()
+    {
+        throw new \MiniApp\StopException();
     }
 
     /**
@@ -424,7 +432,7 @@ class Route
                 }
             }
         }
-        $this->response();
+        return $this->response();
     }
 
     /**
@@ -468,7 +476,9 @@ class Route
                     );  
         } catch (\ReflectionException $e) {
             $this->notFound();
-        } 
+        } catch (StopException $e) {
+            return false;
+        }
     }
 
     /**
@@ -480,7 +490,7 @@ class Route
     {
         header('HTTP/1.1 404 not found');
         header('Content-Type: text/html;charset = utf-8');
-        exit($error);
+        echo $error;
     }
 
     /**
@@ -590,3 +600,5 @@ class BaseModel
         $this->db = $app->db;
     }
 }
+
+class StopException extends \Exception {}
