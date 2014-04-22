@@ -20,4 +20,23 @@ class BaseControllerTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\\MiniApp\\BaseModel', $controller->model('AppTestModel'));
         $this->assertSame($controller->model('AppTestModel'), $controller->model('AppTestModel'));
     }
+
+    /**
+     * @runInSeparateProcess
+     * @expectedException \MiniApp\StopException 
+     */
+    public function testRedirect()
+    {
+        $app = new \MiniApp\MiniApp();
+        $controller = new \MiniApp\BaseController();
+        $controller->redirect('/about', 301);
+    }
+
+    public function testDisplay()
+    {
+        $this->expectOutputString("<p>Hello</p>\n");
+        $app = new \MiniApp\MiniApp(array('view_path' => __DIR__ . '/data/'));
+        $controller = new \MiniApp\BaseController();
+        $controller->display('template');
+    }
 }

@@ -16,7 +16,6 @@ class MiniAppTest extends PHPUnit_Framework_TestCase
         $app = new \MiniApp\MiniApp();
         $this->assertInstanceOf('\\MiniApp\\Template', $app->template);
         $this->assertInstanceOf('\\MiniApp\\Route', $app->route);
-        $this->assertInstanceOf('\\PDO', $app->db);
     }
 
     public function testRoute()

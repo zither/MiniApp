@@ -29,7 +29,6 @@ class MiniApp
         date_default_timezone_set(Config::get('time_zone'));
         $this->route = new Route();
         $this->template = new Template();
-        $this->db = $this->getDatabase();
         if (is_null(self::instance())) {
             self::$instance = $this;
         }
@@ -42,7 +41,7 @@ class MiniApp
      *
      * @return object
      */
-    protected function getDatabase()
+    public function getDatabase()
     {
         if (!$this->db instanceof \PDO) {
             $database = Config::get('database');
@@ -203,6 +202,9 @@ class MiniApp
         return $this->route->mock($settings);
     }
 
+    /**
+     * @brief 采用异常来中断程序运行
+     */
     public function stop()
     {
         throw new \MiniApp\StopException();
@@ -573,6 +575,32 @@ class BaseController
     }
 
     /**
+     * @brief  跳转函数
+     *
+     * @param $url
+     * @param $responseCode
+     *
+     * @return void
+     */
+    public function redirect($url, $responseCode = 302)
+    {
+        $this->app()->redirect($url, $responseCode);
+    }
+
+    /**
+     * @brief 输出模板
+     *
+     * @param $template
+     * @param $data
+     *
+     * @return void
+     */
+    public function display($template, $data = array())
+    {
+        $this->app()->displayView($template, $data);
+    }
+
+    /**
      * @brief 获取 $model 相对应的模型实例
      *
      * @param $model
@@ -596,8 +624,7 @@ class BaseModel
 
     public function __construct()
     {
-        $app = MiniApp::instance();
-        $this->db = $app->db;
+        $this->db = MiniApp::instance()->getDatabase();
     }
 }
 
